@@ -25,16 +25,16 @@ const PATHS: PathOption[] = [
   },
   {
     id: "cloud_computing",
-    title: "Data Engineering",
+    title: "Cloud Computing",
     subtitle: "Cloud services + infrastructure",
-    bullets: ["AWS/GCP/Azure", "Serverless", "Containerization"],
+    bullets: ["AWS/GCP/Azure", "Serverless", "Containers"],
     iconClass: styles.iconCloud,
   },
   {
     id: "machine_learning",
     title: "Machine Learning",
-    subtitle: "Core ML concepts + applied reasoning",
-    bullets: ["Metrics", "Bias/variance", "Data leakage/eval"],
+    subtitle: "ML concepts + applied reasoning",
+    bullets: ["Metrics", "Bias/variance", "Evaluation"],
     iconClass: styles.iconMl,
   },
 ];
