@@ -1,0 +1,358 @@
+.page {
+  min-height: 100vh;
+  background: #1a1a2e;
+  color: #e2e8f0;
+  font-family: var(--path-select-font, "DM Sans", system-ui, sans-serif);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top bar */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: #16162a;
+  border-bottom: 1px solid #2d2d44;
+  flex-shrink: 0;
+}
+
+.navLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.problemListLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  color: #94a3b8;
+  text-decoration: none;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.375rem;
+  transition: color 0.15s, background 0.15s;
+}
+
+.problemListLink:hover {
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.navArrows {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.navArrows button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.navArrows button:hover:not(:disabled) {
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.navArrows button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.navCenter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.runBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  font-family: inherit;
+  border: 1px solid #475569;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: #e2e8f0;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.runBtn:hover {
+  border-color: #64748b;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.submitBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  border-radius: 0.375rem;
+  background: #22c55e;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s, filter 0.15s;
+}
+
+.submitBtn:hover {
+  background: #16a34a;
+  filter: brightness(1.05);
+}
+
+.submitBtn:active {
+  filter: brightness(0.95);
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: #94a3b8;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.375rem;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.timerIcon {
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  color: #94a3b8;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8125rem;
+  font-family: inherit;
+  border: 1px solid #475569;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.backBtn:hover {
+  color: #e2e8f0;
+  border-color: #64748b;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Main split layout */
+.main {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.leftPanel {
+  flex: 0 0 45%;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #2d2d44;
+  background: #1a1a2e;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0 1rem;
+  border-bottom: 1px solid #2d2d44;
+  flex-shrink: 0;
+}
+
+.tab {
+  padding: 0.75rem 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  color: #64748b;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.tab:hover {
+  color: #94a3b8;
+}
+
+.tabActive {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+.contentScroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem 1.25rem 2rem;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.problemTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: #f1f5f9;
+}
+
+.difficulty {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.difficultyEasy { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+.difficultyMedium { background: rgba(234, 179, 8, 0.2); color: #facc15; }
+.difficultyHard { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+.statement {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #cbd5e1;
+  white-space: pre-wrap;
+  margin: 0 0 1rem;
+}
+
+.statement code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.15em 0.4em;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.example {
+  margin-top: 1rem;
+}
+
+.exampleTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin: 0 0 0.35rem;
+}
+
+.exampleBody {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #94a3b8;
+  white-space: pre-wrap;
+  margin: 0;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 0.375rem;
+  border: 1px solid #2d2d44;
+}
+
+/* Right panel - code */
+.rightPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #0d1117;
+}
+
+.codeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #2d2d44;
+  flex-shrink: 0;
+}
+
+.codeLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.languageSelect {
+  font-size: 0.8125rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.25rem;
+  border: 1px solid #2d2d44;
+  background: #16162a;
+  color: #e2e8f0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.editorWrap {
+  flex: 1;
+  min-height: 200px;
+}
+
+@media (max-width: 768px) {
+  .main {
+    flex-direction: column;
+  }
+
+  .leftPanel {
+    flex: 0 0 auto;
+    max-height: 45vh;
+    min-width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #2d2d44;
+  }
+
+  .navCenter {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nav {
+    flex-wrap: wrap;
+  }
+}
