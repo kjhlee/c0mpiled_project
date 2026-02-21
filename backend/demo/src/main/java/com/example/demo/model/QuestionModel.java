@@ -1,6 +1,7 @@
 package com.example.demo.model;
 import java.util.List;
 import com.example.demo.enums.Difficulty;
+import com.example.demo.enums.RoleType;
 
 import lombok.Data;
 
