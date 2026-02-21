@@ -1,0 +1,40 @@
+package com.example.demo.enums;
+
+public enum Concepts {
+	// Core Data Structures
+	ARRAYS,
+	STRINGS,
+	HASH_TABLE,
+	TWO_POINTERS,
+	SLIDING_WINDOW,
+	STACK,
+	QUEUE,
+	LINKED_LIST,
+	TREE,
+	BINARY_TREE,
+	BST,
+	HEAP_PRIORITY_QUEUE,
+	TRIE,
+
+	// Algorithms & Patterns
+	BINARY_SEARCH,
+	SORTING,
+	PREFIX_SUM,
+	INTERVALS,
+	GRAPH,
+	BFS,
+	DFS,
+	TOPOLOGICAL_SORT,
+	UNION_FIND,
+	BACKTRACKING,
+	GREEDY,
+	DYNAMIC_PROGRAMMING,
+	BIT_MANIPULATION,
+
+	// Complexity & Analysis
+	TIME_COMPLEXITY,
+	SPACE_COMPLEXITY,
+
+	// Design-style LC questions
+	DESIGN
+}
