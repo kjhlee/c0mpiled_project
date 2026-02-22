@@ -57,14 +57,21 @@ public class QuestionController {
         return ResponseEntity.ok(solution);
     }
 
-    //TODO: Getter to generate the report of the solutions
+    /** Returns the report for the session (all submitted solutions). Role is optional for display. */
     @GetMapping("/report")
-    public ResponseEntity<ReportModel> getReport() {
+    public ResponseEntity<ReportModel> getReport(
+            @RequestParam(value = "role", required = false) String roleParam) {
         ReportModel report = new ReportModel();
-        report.setRole(RoleType.SWE);
+        if (roleParam != null && !roleParam.isBlank()) {
+            try {
+                report.setRole(RoleType.valueOf(roleParam.toUpperCase().trim()));
+            } catch (IllegalArgumentException ignored) {
+                report.setRole(RoleType.SWE);
+            }
+        } else {
+            report.setRole(RoleType.SWE);
+        }
         report.setSolutions(questionService.getSolutions());
-
-        // System.out.println(questionService.getSolutions().toString());
         return ResponseEntity.ok(report);
     }
 
