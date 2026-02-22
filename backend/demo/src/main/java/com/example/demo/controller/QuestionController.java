@@ -31,19 +31,20 @@ public class QuestionController {
     }
     //TODO: POST question with answer /{ID}
     @PostMapping("/{id}")
-    public ResponseEntity<String> submitAnswer(@PathVariable String id, @RequestBody SolutionModel solution) {
+    public ResponseEntity<SolutionModel> submitAnswer(@PathVariable String id, @RequestBody SolutionModel solution) {
+        
         questionService.submitAnswer(id, solution);
-        return ResponseEntity.ok("Answer submitted for question " + id);
+        return ResponseEntity.ok(solution);
     }
 
     //TODO: Getter to generate the report of the solutions
     @GetMapping("/report")
-    public ResponseEntity<String> getReport() {
+    public ResponseEntity<ReportModel> getReport() {
         ReportModel report = new ReportModel();
         report.setRole(RoleType.SWE);
         report.setSolutions(questionService.getSolutions());
 
-        System.out.println(questionService.getSolutions().toString());
-        return ResponseEntity.ok(report.toString());
+        // System.out.println(questionService.getSolutions().toString());
+        return ResponseEntity.ok(report);
     }
 }
