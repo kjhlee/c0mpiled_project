@@ -15,4 +15,5 @@ public class ReportModel {
     private List<Concepts> weakConcepts;
     private Difficulty suggestedDifficulty;
 
+    private List<SolutionModel> solutions;
 }
