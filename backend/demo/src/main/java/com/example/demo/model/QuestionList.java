@@ -10,6 +10,7 @@ public class QuestionList {
     
     private List<QuestionModel> questionList = new ArrayList<>();
 
+    //TODO: construct a list of leetcode questions from Ethans Question bank
     public QuestionList() {
         // construct a list of Leetcode Questions
         for (int i = 0; i < 5; i++){
