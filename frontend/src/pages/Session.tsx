@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import Editor from "@monaco-editor/react";
 import type { TechPath } from "./PathSelect";
 import { type QuestionDifficulty, type SessionQuestion } from "../data/sessionQuestions";
-import { fetchQuestionsByPath, submitSolution } from "../api/questions";
+import { fetchQuestionsByPath, submitSolution, mapQuestionToSession } from "../api/questions";
+import type { QuestionModelDto } from "../api/questions";
 import styles from "./Session.module.css";
 
 function formatElapsed(seconds: number): string {
@@ -82,12 +83,32 @@ export default function Session() {
   const canGoNext = submittedIndices.has(questionIndex);
   const isLastQuestion = questionIndex === questions.length - 1;
 
-  // Fetch questions by selected role when path is set
+  // Fetch questions by selected role when path is set, or load follow-up questions
   useEffect(() => {
     if (!selectedPath) {
       navigate("/", { replace: true });
       return;
     }
+
+    // Check for follow-up questions in sessionStorage
+    const storedFollowUp = sessionStorage.getItem("followUpQuestions");
+    if (storedFollowUp) {
+      try {
+        const followUpDtos: QuestionModelDto[] = JSON.parse(storedFollowUp);
+        sessionStorage.removeItem("followUpQuestions");
+        const list = followUpDtos.map(mapQuestionToSession);
+        setQuestions(list);
+        setElapsedByQuestion(new Array(list.length).fill(0));
+        setQuestionIndex(0);
+        setSubmittedIndices(new Set());
+        setLoading(false);
+        return;
+      } catch {
+        // Fall through to normal fetch if parsing fails
+        sessionStorage.removeItem("followUpQuestions");
+      }
+    }
+
     setLoading(true);
     setError(null);
     fetchQuestionsByPath(selectedPath)
@@ -141,14 +162,19 @@ export default function Session() {
         time: String(currentElapsed),
       });
       setSubmittedIndices((prev) => new Set(prev).add(questionIndex));
-      alert("Submission received! You can now go to the next question.");
+      if (isLastQuestion) {
+        navigate("/report");
+      } else {
+        // Auto-advance to next question
+        setQuestionIndex((i) => Math.min(questions.length - 1, i + 1));
+      }
     } catch (e) {
       const message = e instanceof Error ? e.message : "Failed to submit solution.";
       setSubmitError(message);
     } finally {
       setSubmitting(false);
     }
-  }, [currentQuestion, questionIndex, code, currentElapsed]);
+  }, [currentQuestion, questionIndex, code, currentElapsed, isLastQuestion, navigate, questions.length]);
 
   const handleRun = useCallback(() => {
     console.log("Run", { questionId: currentQuestion?.id, code });

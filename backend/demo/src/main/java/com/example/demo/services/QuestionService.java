@@ -16,7 +16,8 @@ public class QuestionService {
     List<SolutionModel> solutionList = new ArrayList<>();
 
     public List<QuestionModel> getQuestionsByRole(RoleType role) {
-        return new QuestionBank(role).getQuestions();
+        List<QuestionModel> all = new QuestionBank(role).getQuestions();
+        return all.subList(0, Math.min(5, all.size()));
     }
 
     public QuestionModel getQuestionById(String id) {

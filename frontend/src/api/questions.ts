@@ -56,7 +56,7 @@ def solution():
     pass
 `;
 
-function mapQuestionToSession(dto: QuestionModelDto): SessionQuestion {
+export function mapQuestionToSession(dto: QuestionModelDto): SessionQuestion {
   const { title, statement } = parseQuestionText(dto.question ?? "");
   const hints = [dto.hint1, dto.hint2, dto.hint3].filter(Boolean) as string[];
   const examples = hints.length
@@ -105,4 +105,23 @@ export async function submitSolution(
     body: JSON.stringify({ ...body, id: body.id ?? questionId }),
   });
   if (!res.ok) throw new Error(`Failed to submit solution: ${res.status}`);
+}
+
+/** DTO for posting report data to follow-up endpoint */
+export type ReportModelDto = {
+  role: string;
+  weakConcepts: string[];
+  suggestedDifficulty: string;
+  solutions: SubmitSolutionBody[];
+};
+
+/** Fetches follow-up questions based on the computed report. */
+export async function fetchFollowUpQuestions(report: ReportModelDto): Promise<QuestionModelDto[]> {
+  const res = await fetch(`${API_BASE}/questions/follow-up`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(report),
+  });
+  if (!res.ok) throw new Error(`Failed to fetch follow-up questions: ${res.status}`);
+  return res.json();
 }

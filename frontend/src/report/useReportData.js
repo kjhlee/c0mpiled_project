@@ -10,13 +10,14 @@ import { useState, useEffect } from "react";
 import { normalizeAttempt } from "./normalizeAttempt";
 import { mockAttempts } from "./mockAttempts";
 
-const API_ENDPOINT = "/questions/report";
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8080";
 
 /**
- * @returns {Object} { attempts, loading, error, usingDemoData }
+ * @returns {Object} { attempts, solutions, loading, error, usingDemoData }
  */
 export function useReportData() {
   const [attempts, setAttempts] = useState([]);
+  const [solutions, setSolutions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [usingDemoData, setUsingDemoData] = useState(false);
@@ -27,8 +28,17 @@ export function useReportData() {
         setLoading(true);
         setError(null);
 
-        // Fetch report from backend: GET /questions/report
-        const reportResponse = await fetch(API_ENDPOINT);
+        // Determine role from sessionStorage
+        const selectedPath = sessionStorage.getItem("selectedPath") || "software_engineering";
+        const roleMap = {
+          software_engineering: "SWE",
+          cloud_computing: "CLOUD",
+          machine_learning: "ML",
+        };
+        const role = roleMap[selectedPath] || "SWE";
+
+        // Fetch report from backend with role query param
+        const reportResponse = await fetch(`${API_BASE}/questions/report?role=${role}`);
 
         if (!reportResponse.ok) {
           throw new Error(`HTTP error! status: ${reportResponse.status}`);
@@ -41,20 +51,11 @@ export function useReportData() {
           throw new Error("Invalid response format: expected { role: string, solutions: [...] }");
         }
 
-        // Solutions need to be combined with question data
-        // Fetch questions to get difficulty, concepts, etc.
-        // Use role from backend response, or fallback to sessionStorage
-        const role = reportData.role || (() => {
-          const selectedPath = sessionStorage.getItem("selectedPath") || "software_engineering";
-          const roleMap = {
-            software_engineering: "SWE",
-            cloud_computing: "CLOUD",
-            machine_learning: "ML",
-          };
-          return roleMap[selectedPath] || "SWE";
-        })();
+        // Store raw solutions for follow-up requests
+        setSolutions(reportData.solutions);
 
-        const questionsResponse = await fetch(`/questions/by-role/${role}`);
+        // Fetch questions to get difficulty, concepts, etc.
+        const questionsResponse = await fetch(`${API_BASE}/questions/by-role/${role}`);
         if (!questionsResponse.ok) {
           throw new Error(`Failed to fetch questions: ${questionsResponse.status}`);
         }
@@ -91,6 +92,7 @@ export function useReportData() {
         console.warn("Failed to fetch report data, using mock data:", err);
         setError(err instanceof Error ? err.message : "Unknown error");
         setAttempts(mockAttempts);
+        setSolutions([]);
         setUsingDemoData(true);
       } finally {
         setLoading(false);
@@ -102,6 +104,7 @@ export function useReportData() {
 
   return {
     attempts,
+    solutions,
     loading,
     error,
     usingDemoData,
