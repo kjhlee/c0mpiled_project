@@ -16,13 +16,10 @@ public class QuestionModel {
     private List<String> concepts;
 
     private String hint1;
-    private Boolean hint1Used = false;
 
     private String hint2;
-    private Boolean hint2Used = false;
 
     private String hint3;
-    private Boolean hint3Used = false;
 
     private String time;
 
