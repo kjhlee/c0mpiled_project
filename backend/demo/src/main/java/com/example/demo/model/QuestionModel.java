@@ -1,5 +1,7 @@
 package com.example.demo.model;
 import java.util.List;
+
+import com.example.demo.enums.Concepts;
 import com.example.demo.enums.Difficulty;
 import com.example.demo.enums.RoleType;
 
@@ -13,8 +15,7 @@ public class QuestionModel {
 
     private Difficulty difficulty;
 
-    private List<String> concepts;
-
+    private List<Concepts> concepts;
     private String hint1;
     private String hint2;
     private String hint3;
