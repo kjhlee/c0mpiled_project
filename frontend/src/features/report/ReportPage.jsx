@@ -1,7 +1,9 @@
 /**
  * Report Page Component
  * 
- * Mount this page at /report and ensure frontend can reach GET /api/report (proxy or base URL).
+ * Mount this page at /report and ensure frontend can reach:
+ * - GET /questions/report (returns { role, solutions })
+ * - GET /questions/by-role/{role} (returns questions for combining with solutions)
  * 
  * Displays comprehensive analytics and visualization of user's LeetCode attempt performance.
  */
@@ -182,6 +184,56 @@ export function ReportPage() {
           </div>
         </div>
       )}
+
+      {/* Recommendations Section */}
+      <div style={{ marginBottom: "2rem", padding: "1.5rem", backgroundColor: "#f5f5f5", borderRadius: "8px" }}>
+        <h2 style={{ marginBottom: "1rem" }}>Recommendations</h2>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div>
+            <strong>Role:</strong> <span style={{ textTransform: "uppercase" }}>{metrics.role}</span>
+          </div>
+          {metrics.weakConcepts && metrics.weakConcepts.length > 0 && (
+            <div>
+              <strong>Weak Concepts:</strong>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                {metrics.weakConcepts.map((concept) => (
+                  <span
+                    key={concept}
+                    style={{
+                      padding: "0.5rem 1rem",
+                      backgroundColor: "#fff3cd",
+                      color: "#856404",
+                      borderRadius: "4px",
+                      fontSize: "0.875rem",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {concept}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {metrics.suggestedDifficulty && (
+            <div>
+              <strong>Suggested Difficulty:</strong>{" "}
+              <span
+                style={{
+                  padding: "0.5rem 1rem",
+                  backgroundColor: metrics.suggestedDifficulty === "HARD" ? "#f44336" : metrics.suggestedDifficulty === "MEDIUM" ? "#ff9800" : "#4caf50",
+                  color: "white",
+                  borderRadius: "4px",
+                  fontSize: "0.875rem",
+                  fontWeight: "bold",
+                  textTransform: "uppercase",
+                }}
+              >
+                {metrics.suggestedDifficulty}
+              </span>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

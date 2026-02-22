@@ -1,9 +1,10 @@
 # Attempt Schema Mapping
 
-## Backend Schema (QuestionModel.java)
+## Backend Schema (Combined QuestionModel + SolutionModel)
 
-The backend returns attempts with the following structure based on `QuestionModel.java`:
+The backend returns attempts that combine fields from both `QuestionModel.java` and `SolutionModel.java`:
 
+### QuestionModel.java fields:
 ```java
 {
   id: String,
@@ -11,16 +12,44 @@ The backend returns attempts with the following structure based on `QuestionMode
   difficulty: Difficulty,  // Enum: EASY, MEDIUM, HARD
   concepts: List<String>,
   hint1: String,
-  hint1Used: Boolean,
   hint2: String,
-  hint2Used: Boolean,
-  hint3: String,
-  hint3Used: Boolean,
-  time: String  // Time spent (format: seconds or milliseconds as string)
+  hint3: String
 }
 ```
 
-**Note**: The attempt payload likely includes an additional `correct` or `correctness` boolean field indicating whether the answer was correct, even though it's not explicitly in QuestionModel.java. This is inferred from the requirement for correctness metrics.
+### SolutionModel.java fields:
+```java
+{
+  id: String,
+  solution: String,
+  time: String,           // Time spent (format: seconds or milliseconds as string)
+  correct: Boolean,       // Whether the answer was correct
+  hint1used: Boolean,     // Note: lowercase field name
+  hint2used: Boolean,     // Note: lowercase field name
+  hint3used: Boolean      // Note: lowercase field name
+}
+```
+
+### Combined Attempt Payload:
+The `/questions/report` endpoint returns `{ role: RoleType, solutions: SolutionModel[] }`.
+The frontend then fetches `/questions/by-role/{role}` to get questions and combines them with solutions to create attempts:
+```java
+{
+  id: String,                    // From QuestionModel or SolutionModel
+  question: String,              // From QuestionModel
+  difficulty: Difficulty,        // From QuestionModel (EASY, MEDIUM, HARD)
+  concepts: List<String>,       // From QuestionModel
+  hint1: String,                // From QuestionModel
+  hint2: String,                // From QuestionModel
+  hint3: String,                // From QuestionModel
+  solution: String,             // From SolutionModel (optional)
+  time: String,                 // From SolutionModel
+  correct: Boolean,             // From SolutionModel
+  hint1used: Boolean,           // From SolutionModel (lowercase)
+  hint2used: Boolean,           // From SolutionModel (lowercase)
+  hint3used: Boolean            // From SolutionModel (lowercase)
+}
+```
 
 ## Frontend Normalized Schema (Attempt)
 
@@ -48,11 +77,19 @@ The frontend normalizes attempts to the following structure:
 
 ## Backend Field Names (Exact)
 
+**From QuestionModel:**
 - `id`: string
+- `question`: string
 - `difficulty`: "EASY" | "MEDIUM" | "HARD" (enum)
 - `concepts`: string[] (array of concept strings)
+- `hint1`, `hint2`, `hint3`: string
+
+**From SolutionModel:**
+- `id`: string (may match QuestionModel id)
+- `solution`: string (optional)
 - `time`: string (numeric string, may be milliseconds or seconds)
-- `correct` or `correctness`: boolean (inferred, not in QuestionModel but required for metrics)
+- `correct`: boolean (required for metrics)
+- `hint1used`, `hint2used`, `hint3used`: boolean (lowercase field names)
 
 ## Normalization Rules
 

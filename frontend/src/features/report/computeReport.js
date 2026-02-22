@@ -2,8 +2,45 @@
  * Computes comprehensive report metrics from a list of attempts.
  * 
  * @param {Array<Object>} attempts - Array of normalized Attempt objects
- * @returns {Object} ReportMetrics with summary, byTopic, radarData, barData, and weakestTopics
+ * @returns {Object} ReportMetrics with summary, byTopic, radarData, barData, weakestTopics, role, weakConcepts, suggestedDifficulty
  */
+
+// Concepts enum values from backend (must match Concepts.java)
+const CONCEPTS_ENUM = {
+  // Core Data Structures
+  ARRAYS: "ARRAYS",
+  STRINGS: "STRINGS",
+  HASH_TABLE: "HASH_TABLE",
+  TWO_POINTERS: "TWO_POINTERS",
+  SLIDING_WINDOW: "SLIDING_WINDOW",
+  STACK: "STACK",
+  QUEUE: "QUEUE",
+  LINKED_LIST: "LINKED_LIST",
+  TREE: "TREE",
+  BINARY_TREE: "BINARY_TREE",
+  BST: "BST",
+  HEAP_PRIORITY_QUEUE: "HEAP_PRIORITY_QUEUE",
+  TRIE: "TRIE",
+  // Algorithms & Patterns
+  BINARY_SEARCH: "BINARY_SEARCH",
+  SORTING: "SORTING",
+  PREFIX_SUM: "PREFIX_SUM",
+  INTERVALS: "INTERVALS",
+  GRAPH: "GRAPH",
+  BFS: "BFS",
+  DFS: "DFS",
+  TOPOLOGICAL_SORT: "TOPOLOGICAL_SORT",
+  UNION_FIND: "UNION_FIND",
+  BACKTRACKING: "BACKTRACKING",
+  GREEDY: "GREEDY",
+  DYNAMIC_PROGRAMMING: "DYNAMIC_PROGRAMMING",
+  BIT_MANIPULATION: "BIT_MANIPULATION",
+  // Complexity & Analysis
+  TIME_COMPLEXITY: "TIME_COMPLEXITY",
+  SPACE_COMPLEXITY: "SPACE_COMPLEXITY",
+  // Design-style LC questions
+  DESIGN: "DESIGN",
+};
 
 // Difficulty weights
 const DIFFICULTY_WEIGHTS = {
@@ -108,6 +145,7 @@ function computeTier(composite) {
  */
 export function computeReport(attempts) {
   if (attempts.length === 0) {
+    const role = sessionStorage.getItem("selectedPath") || "SWE";
     return {
       summary: {
         n: 0,
@@ -121,6 +159,9 @@ export function computeReport(attempts) {
       radarData: [],
       barData: [],
       weakestTopics: [],
+      role: "SWE",
+      weakConcepts: [],
+      suggestedDifficulty: "EASY",
     };
   }
 
@@ -189,6 +230,32 @@ export function computeReport(attempts) {
   const sortedTopics = [...byTopic].sort((a, b) => a.accuracyPct - b.accuracyPct);
   const weakestTopics = sortedTopics.slice(0, 2).map((t) => t.topic);
 
+  // Get role from sessionStorage (set by PathSelect page) and map to backend RoleType enum
+  const selectedPath = sessionStorage.getItem("selectedPath") || "software_engineering";
+  const roleMap = {
+    software_engineering: "SWE",
+    cloud_computing: "CLOUD",
+    machine_learning: "ML",
+  };
+  const role = roleMap[selectedPath] || "SWE";
+
+  // Compute weakConcepts using Concepts enum values
+  // Filter to only include valid Concepts enum values
+  const weakConcepts = weakestTopics
+    .filter((topic) => Object.values(CONCEPTS_ENUM).includes(topic))
+    .slice(0, 2); // Ensure max 2 concepts
+
+  // Compute suggestedDifficulty based on performance
+  // If weighted score is high, suggest Hard; if low, suggest Easy
+  let suggestedDifficulty = "MEDIUM"; // Default
+  if (weightedScore >= 80) {
+    suggestedDifficulty = "HARD";
+  } else if (weightedScore >= 60) {
+    suggestedDifficulty = "MEDIUM";
+  } else {
+    suggestedDifficulty = "EASY";
+  }
+
   return {
     summary: {
       n,
@@ -202,5 +269,8 @@ export function computeReport(attempts) {
     radarData,
     barData,
     weakestTopics,
+    role,
+    weakConcepts,
+    suggestedDifficulty,
   };
 }
