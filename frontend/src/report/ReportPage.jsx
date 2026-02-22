@@ -8,9 +8,11 @@
  * Displays comprehensive analytics and visualization of user's LeetCode attempt performance.
  */
 
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useReportData } from "./useReportData";
 import { computeReport } from "./computeReport";
+import { fetchFollowUpQuestions } from "../api/questions";
 
 // Import recharts (will use table fallback if not available)
 import {
@@ -30,8 +32,13 @@ import {
 } from "recharts";
 
 export function ReportPage() {
-  const { attempts, loading, error, usingDemoData } = useReportData();
+  const navigate = useNavigate();
+  const { attempts, solutions, loading, error, usingDemoData } = useReportData();
   const metrics = computeReport(attempts);
+
+  const [followUpQuestions, setFollowUpQuestions] = useState(null);
+  const [followUpLoading, setFollowUpLoading] = useState(false);
+  const [followUpError, setFollowUpError] = useState(null);
 
   if (loading) {
     return (
@@ -48,6 +55,32 @@ export function ReportPage() {
       </div>
     );
   }
+
+  const handleGetFollowUp = async () => {
+    setFollowUpLoading(true);
+    setFollowUpError(null);
+    try {
+      const report = {
+        role: metrics.role,
+        weakConcepts: metrics.weakConcepts,
+        suggestedDifficulty: metrics.suggestedDifficulty,
+        solutions: solutions,
+      };
+      const questions = await fetchFollowUpQuestions(report);
+      setFollowUpQuestions(questions);
+    } catch (err) {
+      setFollowUpError(err instanceof Error ? err.message : "Failed to get follow-up questions");
+    } finally {
+      setFollowUpLoading(false);
+    }
+  };
+
+  const handleStartFollowUp = () => {
+    if (followUpQuestions) {
+      sessionStorage.setItem("followUpQuestions", JSON.stringify(followUpQuestions));
+      navigate("/session");
+    }
+  };
 
   const hasRecharts = RadarChart && BarChart;
 
@@ -233,6 +266,107 @@ export function ReportPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Follow-Up Questions Section */}
+      <div style={{ marginBottom: "2rem", padding: "1.5rem", backgroundColor: "#e8f5e9", borderRadius: "8px" }}>
+        <h2 style={{ marginBottom: "1rem" }}>Follow-Up Practice</h2>
+        <p style={{ marginBottom: "1rem", color: "#555" }}>
+          Get personalized follow-up questions based on your weak areas and suggested difficulty.
+        </p>
+        <button
+          onClick={handleGetFollowUp}
+          disabled={followUpLoading}
+          style={{
+            padding: "0.75rem 1.5rem",
+            backgroundColor: followUpLoading ? "#aaa" : "#4caf50",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            fontSize: "1rem",
+            fontWeight: "bold",
+            cursor: followUpLoading ? "not-allowed" : "pointer",
+          }}
+        >
+          {followUpLoading ? "Loading..." : "Get Follow-Up Questions"}
+        </button>
+
+        {followUpError && (
+          <p style={{ color: "red", marginTop: "0.75rem" }}>{followUpError}</p>
+        )}
+
+        {followUpQuestions && followUpQuestions.length > 0 && (
+          <div style={{ marginTop: "1.5rem" }}>
+            <h3 style={{ marginBottom: "0.75rem" }}>Recommended Questions</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+              {followUpQuestions.map((q, idx) => (
+                <div
+                  key={q.id || idx}
+                  style={{
+                    padding: "1rem",
+                    backgroundColor: "white",
+                    borderRadius: "6px",
+                    border: "1px solid #ddd",
+                  }}
+                >
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <strong>{q.question ? q.question.split(": ")[0] : `Question ${idx + 1}`}</strong>
+                    <span
+                      style={{
+                        padding: "0.25rem 0.75rem",
+                        backgroundColor: q.difficulty === "HARD" ? "#f44336" : q.difficulty === "MEDIUM" ? "#ff9800" : "#4caf50",
+                        color: "white",
+                        borderRadius: "4px",
+                        fontSize: "0.75rem",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {q.difficulty}
+                    </span>
+                  </div>
+                  {q.concepts && q.concepts.length > 0 && (
+                    <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.25rem", flexWrap: "wrap" }}>
+                      {q.concepts.map((c) => (
+                        <span
+                          key={c}
+                          style={{
+                            padding: "0.125rem 0.5rem",
+                            backgroundColor: "#e3f2fd",
+                            color: "#1565c0",
+                            borderRadius: "4px",
+                            fontSize: "0.75rem",
+                          }}
+                        >
+                          {c}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={handleStartFollowUp}
+              style={{
+                marginTop: "1rem",
+                padding: "0.75rem 1.5rem",
+                backgroundColor: "#2196f3",
+                color: "white",
+                border: "none",
+                borderRadius: "6px",
+                fontSize: "1rem",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              Start Follow-Up Session
+            </button>
+          </div>
+        )}
+
+        {followUpQuestions && followUpQuestions.length === 0 && (
+          <p style={{ marginTop: "0.75rem", color: "#666" }}>No follow-up questions available.</p>
+        )}
       </div>
     </div>
   );

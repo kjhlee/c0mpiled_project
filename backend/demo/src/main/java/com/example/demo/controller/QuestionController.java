@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.QuestionModel;
@@ -57,14 +58,17 @@ public class QuestionController {
         return ResponseEntity.ok(solution);
     }
 
-    //TODO: Getter to generate the report of the solutions
     @GetMapping("/report")
-    public ResponseEntity<ReportModel> getReport() {
+    public ResponseEntity<ReportModel> getReport(@RequestParam(defaultValue = "SWE") String role) {
+        RoleType roleType;
+        try {
+            roleType = RoleType.valueOf(role.toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            roleType = RoleType.SWE;
+        }
         ReportModel report = new ReportModel();
-        report.setRole(RoleType.SWE);
+        report.setRole(roleType);
         report.setSolutions(questionService.getSolutions());
-
-        // System.out.println(questionService.getSolutions().toString());
         return ResponseEntity.ok(report);
     }
 
