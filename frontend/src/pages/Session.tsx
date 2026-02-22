@@ -2,10 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Editor from "@monaco-editor/react";
 import type { TechPath } from "./PathSelect";
-import {
-  MOCK_SESSION_QUESTIONS,
-  type QuestionDifficulty,
-} from "../data/sessionQuestions";
+import { type QuestionDifficulty, type SessionQuestion } from "../data/sessionQuestions";
+import { fetchQuestionsByPath } from "../api/questions";
 import styles from "./Session.module.css";
 
 function formatElapsed(seconds: number): string {
@@ -71,14 +69,12 @@ export default function Session() {
   const navigate = useNavigate();
   const selectedPath = sessionStorage.getItem("selectedPath") as TechPath | null;
 
+  const [questions, setQuestions] = useState<SessionQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [code, setCode] = useState<string>("");
-  const questions = MOCK_SESSION_QUESTIONS;
-
-  // Per-question elapsed seconds (only the current question's timer runs)
-  const [elapsedByQuestion, setElapsedByQuestion] = useState<number[]>(() =>
-    new Array(MOCK_SESSION_QUESTIONS.length).fill(0)
-  );
+  const [elapsedByQuestion, setElapsedByQuestion] = useState<number[]>([]);
   const [submittedIndices, setSubmittedIndices] = useState<Set<number>>(new Set());
 
   const currentQuestion = questions[questionIndex] ?? questions[0];
@@ -86,8 +82,28 @@ export default function Session() {
   const canGoNext = submittedIndices.has(questionIndex);
   const isLastQuestion = questionIndex === questions.length - 1;
 
+  // Fetch questions by selected role when path is set
+  useEffect(() => {
+    if (!selectedPath) {
+      navigate("/", { replace: true });
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    fetchQuestionsByPath(selectedPath)
+      .then((list) => {
+        setQuestions(list);
+        setElapsedByQuestion(new Array(list.length).fill(0));
+        setQuestionIndex(0);
+        setSubmittedIndices(new Set());
+      })
+      .catch((e) => setError(e instanceof Error ? e.message : "Failed to load questions"))
+      .finally(() => setLoading(false));
+  }, [selectedPath, navigate]);
+
   // Timer: only the current question's elapsed time increments every second
   useEffect(() => {
+    if (questions.length === 0) return;
     const interval = setInterval(() => {
       setElapsedByQuestion((prev) => {
         const next = [...prev];
@@ -96,7 +112,7 @@ export default function Session() {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [questionIndex]);
+  }, [questionIndex, questions.length]);
 
   // Reset editor to starter code when switching question
   useEffect(() => {
@@ -123,11 +139,25 @@ export default function Session() {
     alert("Run code (Demo — no execution yet.)");
   }, [currentQuestion?.id, code]);
 
-  useEffect(() => {
-    if (!selectedPath) navigate("/", { replace: true });
-  }, [selectedPath, navigate]);
-
   if (!selectedPath) return null;
+  if (loading) {
+    return (
+      <div className={styles.page}>
+        <div style={{ padding: "2rem", textAlign: "center", color: "#94a3b8" }}>Loading questions…</div>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className={styles.page}>
+        <div style={{ padding: "2rem", textAlign: "center" }}>
+          <p>{error}</p>
+          <Link to="/" className={styles.backBtn}>Back to path selection</Link>
+        </div>
+      </div>
+    );
+  }
+  if (questions.length === 0) return <div className={styles.page}>No questions for this path.</div>;
 
   return (
     <div className={styles.page}>

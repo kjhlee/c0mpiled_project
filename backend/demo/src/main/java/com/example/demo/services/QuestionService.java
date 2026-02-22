@@ -15,6 +15,10 @@ public class QuestionService {
     List<QuestionModel> questionList = new QuestionBank(RoleType.SWE).getQuestions();
     List<SolutionModel> solutionList = new ArrayList<>();
 
+    public List<QuestionModel> getQuestionsByRole(RoleType role) {
+        return new QuestionBank(role).getQuestions();
+    }
+
     public QuestionModel getQuestionById(String id) {
         return questionList.get(Integer.parseInt(id));
     }
