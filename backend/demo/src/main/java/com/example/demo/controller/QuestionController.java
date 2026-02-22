@@ -1,5 +1,7 @@
 package com.example.demo.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +24,18 @@ public class QuestionController {
 
     public QuestionController(QuestionService questionService) {
         this.questionService = questionService;
+    }
+
+    /** Returns all questions for the given role (SWE, CLOUD, ML). */
+    @GetMapping("/by-role/{role}")
+    public ResponseEntity<List<QuestionModel>> getQuestionsByRole(@PathVariable String role) {
+        RoleType roleType;
+        try {
+            roleType = RoleType.valueOf(role.toUpperCase().trim());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(questionService.getQuestionsByRole(roleType));
     }
 
     //TODO: Get questions with request id /{request_ID}
