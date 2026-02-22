@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Editor from "@monaco-editor/react";
 import type { TechPath } from "./PathSelect";
 import { type QuestionDifficulty, type SessionQuestion } from "../data/sessionQuestions";
-import { fetchQuestionsByPath } from "../api/questions";
+import { fetchQuestionsByPath, submitSolution } from "../api/questions";
 import styles from "./Session.module.css";
 
 function formatElapsed(seconds: number): string {
@@ -128,11 +128,27 @@ export default function Session() {
     setQuestionIndex((i) => Math.min(questions.length - 1, i + 1));
   }, [canGoNext, isLastQuestion, questions.length]);
 
-  const handleSubmit = useCallback(() => {
-    console.log("Submit", { questionId: currentQuestion?.id, code });
-    setSubmittedIndices((prev) => new Set(prev).add(questionIndex));
-    alert("Submission received! You can now go to the next question.");
-  }, [currentQuestion?.id, questionIndex, code]);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = useCallback(async () => {
+    if (!currentQuestion) return;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await submitSolution(currentQuestion.id, {
+        solution: code,
+        time: String(currentElapsed),
+      });
+      setSubmittedIndices((prev) => new Set(prev).add(questionIndex));
+      alert("Submission received! You can now go to the next question.");
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Failed to submit solution.";
+      setSubmitError(message);
+    } finally {
+      setSubmitting(false);
+    }
+  }, [currentQuestion, questionIndex, code, currentElapsed]);
 
   const handleRun = useCallback(() => {
     console.log("Run", { questionId: currentQuestion?.id, code });
@@ -188,13 +204,23 @@ export default function Session() {
             <PlayIcon />
             Run Code
           </button>
-          <button type="button" onClick={handleSubmit} className={styles.submitBtn}>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className={styles.submitBtn}
+            disabled={submitting}
+          >
             <SubmitIcon />
-            Submit
+            {submitting ? "Submitting…" : "Submit"}
           </button>
         </div>
 
         <div className={styles.navRight}>
+          {submitError && (
+            <span style={{ fontSize: "0.8125rem", color: "#f87171" }} title={submitError}>
+              Submit failed
+            </span>
+          )}
           <div className={styles.timer} title="Time on this question">
             <TimerIcon />
             <span>{formatElapsed(currentElapsed)}</span>
@@ -217,7 +243,7 @@ export default function Session() {
               <>
                 <div className={styles.titleRow}>
                   <h1 className={styles.problemTitle}>
-                    {currentQuestion.id}. {currentQuestion.title}
+                    {questionIndex + 1}. {currentQuestion.title}
                   </h1>
                   <span className={`${styles.difficulty} ${difficultyClass(currentQuestion.difficulty)}`}>
                     {currentQuestion.difficulty}
