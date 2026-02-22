@@ -82,3 +82,27 @@ export async function fetchQuestionsByPath(path: TechPath): Promise<SessionQuest
   const dtos: QuestionModelDto[] = await res.json();
   return dtos.map(mapQuestionToSession);
 }
+
+/** Request body for submitting a solution (matches backend SolutionModel). */
+export type SubmitSolutionBody = {
+  id?: string;
+  solution: string;
+  time?: string;
+  correct?: boolean;
+  hint1used?: boolean;
+  hint2used?: boolean;
+  hint3used?: boolean;
+};
+
+/** Submits the user's code for a question. Backend stores it via POST /questions/{questionId}. */
+export async function submitSolution(
+  questionId: string,
+  body: SubmitSolutionBody
+): Promise<void> {
+  const res = await fetch(`${API_BASE}/questions/${questionId}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...body, id: body.id ?? questionId }),
+  });
+  if (!res.ok) throw new Error(`Failed to submit solution: ${res.status}`);
+}
