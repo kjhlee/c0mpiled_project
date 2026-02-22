@@ -16,11 +16,7 @@ public class QuestionModel {
     private List<String> concepts;
 
     private String hint1;
-
     private String hint2;
-
     private String hint3;
-
-    private String time;
 
 }

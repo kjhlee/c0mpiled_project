@@ -34,6 +34,7 @@ public class QuestionBank {
             "One pass through the array is enough — store each number's index as you go.",
             "O(n)"));
 
+
         questions.add(q("1", "Valid Parentheses", Difficulty.EASY,
             "Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid. An input string is valid if open brackets are closed by the same type of brackets and in the correct order.",
             tags("STACK", "STRINGS"),
@@ -167,7 +168,6 @@ public class QuestionBank {
         qm.setHint1(hint1);
         qm.setHint2(hint2);
         qm.setHint3(hint3);
-        qm.setTime(time);
         return qm;
     }
 
