@@ -1,8 +1,8 @@
 package com.example.demo.services;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -22,8 +22,16 @@ public class QuestionFilterService {
         List<QuestionModel> pool = new QuestionBank(report.getRole()).getQuestions();
         Difficulty target = report.getSuggestedDifficulty();
 
-        // Keep only questions that overlap with weak concepts
+        // Exclude questions the user already answered
+        Set<String> answeredIds = report.getSolutions() != null
+                ? report.getSolutions().stream()
+                        .map(s -> s.getId())
+                        .collect(Collectors.toSet())
+                : Set.of();
+
+        // Keep only unanswered questions that overlap with weak concepts
         List<QuestionModel> conceptMatches = pool.stream()
+                .filter(q -> !answeredIds.contains(q.getId()))
                 .filter(q -> q.getConcepts().stream()
                         .anyMatch(c -> report.getWeakConcepts().contains(c)))
                 .collect(Collectors.toList());
